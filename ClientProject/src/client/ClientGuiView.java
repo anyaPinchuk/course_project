@@ -88,6 +88,12 @@ public class ClientGuiView extends JFrame {
                 setFrame(frame);
                 break;
             }
+            case DELETE_THIS_SESSION:{
+                frame = new DeleteSessionFrame(controller);
+                setSize(frame.getDimension());
+                setFrame(frame);
+                break;
+            }
         }
     }
 

@@ -2,11 +2,11 @@ package client;
 
 import message.Message;
 import message.MessageType;
+import session.Film;
+import session.FilmSession;
 import session.Place;
-import session.Session;
 import user.User;
 
-import javax.jws.soap.SOAPBinding;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -22,10 +22,11 @@ import java.util.concurrent.Future;
 public class ClientGuiModel {
     private final ClientGuiView view;
 
-    private List<Session> sessions = new LinkedList<>();
+    private List<FilmSession> filmSessions = new LinkedList<>();
+    private List<Film> films = new LinkedList<>();
 
-    public List<Session> getSessions() {
-        return sessions;
+    public List<FilmSession> getFilmSessions() {
+        return filmSessions;
     }
 
     private Connection connection = null;
@@ -43,7 +44,8 @@ public class ClientGuiModel {
         CONNECTED,
         PERSON,
         CONNECTED_ADMIN,
-        ADD_NEW_SESSION
+        ADD_NEW_SESSION,
+        DELETE_THIS_SESSION
     }
 
     public boolean isAdmin() {
@@ -106,6 +108,8 @@ public class ClientGuiModel {
 
     public void connectAddSession(){ nowConnectionState = ConnectionState.ADD_NEW_SESSION;}
 
+    public void connectDeleteSession(){ nowConnectionState = ConnectionState.DELETE_THIS_SESSION;}
+
     private ExecutorService executor = Executors.newFixedThreadPool(1);
 
 
@@ -116,9 +120,20 @@ public class ClientGuiModel {
     }
 
     public void tryAddSession(){
+        try {
+        connection.send(new Message(MessageType.FILM_LIST));
+        } catch (Exception exception) {
+            connectError();
+        }
         connectAddSession();
         view.updateWindow(nowConnectionState);
     }
+
+    public void tryDeleteSession(){
+        connectDeleteSession();
+        view.updateWindow(nowConnectionState);
+    }
+
 
     public void connectionToServer(String ip, int port) {
         // Try connect
@@ -181,9 +196,11 @@ public class ClientGuiModel {
             } else if (nowConnectionState == ConnectionState.CONNECTED_ADMIN) {
                 System.out.println("connectedadm");
                 communicationConnectAdmin(message);
-            }
-            else if (nowConnectionState == ConnectionState.ADD_NEW_SESSION){
+            } else if (nowConnectionState == ConnectionState.ADD_NEW_SESSION){
                 communicationAddSession(message);
+            }
+            else if (nowConnectionState == ConnectionState.DELETE_THIS_SESSION){
+                communicationDeleteSession(message);
             }
         }
     }
@@ -219,8 +236,25 @@ public class ClientGuiModel {
             }
         }
     }
-
+    public void communicationDeleteSession(Message message){
+        System.out.println(message.getType());
+        switch (message.getType()){
+            case SESSION_DELETED: {
+                view.showMessageInfo("Сеанс удален");
+                connectSuccessAdmin();
+                view.updateWindow(nowConnectionState);
+                break;
+            }
+            case ID_NOT_FOUND:{
+                view.showMessageInfo("Сеанс с таким ID не найден");
+                connectSuccessAdmin();
+                view.updateWindow(nowConnectionState);
+                break;
+            }
+        }
+    }
     public void communicationAddSession(Message message){
+        System.out.println(message.getType());
         switch (message.getType()){
             case SESSION_ADDED: {
                 view.showMessageInfo("Сеанс добавлен");
@@ -231,9 +265,20 @@ public class ClientGuiModel {
         }
     }
 
-    public void addSession(Session session){
+    public List<Film> getFilms(){
+        return films;
+    }
+
+    public void addSession(Calendar date, ArrayList<Place> places, int duration, String filmName){
         try {
-            connection.send(new Message(MessageType.ADD_SESSION, session));
+            connection.send(new Message(MessageType.ADD_SESSION, new FilmSession(date,places,duration,new Film(filmName,"",0,""))));
+        } catch (Exception exception) {
+            connectError();
+        }
+    }
+    public void deleteSession(int id){
+        try {
+            connection.send(new Message(MessageType.DELETE_SESSION, id));
         } catch (Exception exception) {
             connectError();
         }
@@ -243,9 +288,14 @@ public class ClientGuiModel {
         System.out.println(message.getType());
         switch (message.getType()) {
             case SESSION_LIST: {
-                sessions = (LinkedList<Session>) message.getData();
-                System.out.println(sessions);
-                view.showInfoToUser(message.getType(), sessions);
+                filmSessions = (LinkedList<FilmSession>) message.getData();
+                System.out.println(filmSessions);
+                view.showInfoToUser(message.getType(), filmSessions);
+                break;
+            }
+            case FILM_LIST:{
+                films = (LinkedList<Film>) message.getData();
+                view.showInfoToUser(message.getType(), films);
                 break;
             }
 
@@ -256,11 +306,14 @@ public class ClientGuiModel {
         System.out.println(message.getType());
         switch (message.getType()) {
             case SESSION_LIST: {
-                sessions = (LinkedList<Session>) message.getData();
-                view.showInfoToUser(message.getType(), sessions);
+                filmSessions = (LinkedList<FilmSession>) message.getData();
+                System.out.println(filmSessions);
+                view.showInfoToUser(message.getType(), filmSessions);
                 break;
             }
             case FILM_LIST:{
+                films = (LinkedList<Film>) message.getData();
+                view.showInfoToUser(message.getType(), films);
                 break;
             }
         }
@@ -268,7 +321,7 @@ public class ClientGuiModel {
 
 
 
-    public void buyOrBook(boolean flag, ArrayList<Place> selectedPlaces, Session s) {
+    public void buyOrBook(boolean flag, ArrayList<Place> selectedPlaces, FilmSession s) {
         try {
             if (flag) {
                 connection.send(new Message(MessageType.SELECTED_SESSION, s));

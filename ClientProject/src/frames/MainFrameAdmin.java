@@ -2,23 +2,21 @@ package frames;
 
 import client.ClientGuiController;
 import message.MessageType;
+import session.FilmSession;
 import session.Place;
-import session.Session;
 import session.StatePlace;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Set;
 
 /**
  * Created by ANYA on 07.10.2016.
  */
 public class MainFrameAdmin extends AbstractFrame {
-    private DefaultListModel<Session> modelSessionList;
+    private DefaultListModel<FilmSession> modelSessionList;
     private DefaultListModel<Place> modelPlaceList;
-    private Session selectedSession;
+    private FilmSession selectedFilmSession;
 
     public MainFrameAdmin(ClientGuiController controller) {
         super(controller);
@@ -60,23 +58,26 @@ public class MainFrameAdmin extends AbstractFrame {
         deleteSession.setBounds(30,70,130,80);
         thirdPanel.add(addSession);
         thirdPanel.add(deleteSession);
-
+/////////////////////////////////////////////////
+        deleteSession.addActionListener(e->{
+            controller.tryDeleteSession();
+        });
         ////////////////////////////////////////////////////////////////////
-        Session[] sessionList = controller.getSessionList().toArray(new Session[]{});
+        FilmSession[] filmSessionList = controller.getSessionList().toArray(new FilmSession[]{});
         modelSessionList = new DefaultListModel<>();
         modelPlaceList = new DefaultListModel<>();
 
-        if (sessionList != null) {
+        if (filmSessionList != null) {
 
-            for (Session session : sessionList) {
+            for (FilmSession filmSession : filmSessionList) {
                 int flag=0;
-                for (Place p:session.getAllPlaces()){
+                for (Place p: filmSession.getAllPlaces()){
                     if (p.getStatePlace()== StatePlace.AVAILABLE){
                         flag++;
                     }
                 }
                 if (flag != 0) {
-                    modelSessionList.addElement(session);
+                    modelSessionList.addElement(filmSession);
                 }
             }
 
@@ -97,7 +98,7 @@ public class MainFrameAdmin extends AbstractFrame {
             public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 Component component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 JLabel label = (JLabel) component;
-                Session session = (Session) value;
+                FilmSession filmSession = (FilmSession) value;
                 String result = "<html><style>\n" +
                         "    div.wrapper {\n" +
                         "        border: 4px solid black;\n" +
@@ -107,19 +108,33 @@ public class MainFrameAdmin extends AbstractFrame {
                         "<div class=\"wrapper\">\n" +
                         "    <div>\n" +
                         "<span style='color: blue; font-size: 15px;'>" +
-                        (int) session.getId() +
-                        " </span><span style='font-size: 15px;'>" +
-                        session.getDate().get(Calendar.DAY_OF_MONTH) + "." + session.getDate().get(Calendar.MONTH) + " " + session.getDate().get(Calendar.HOUR)
-                        + ":" + session.getDate().get(Calendar.MINUTE) +
+                        (int) filmSession.getId() +
+                        " </span><span style='font-size: 15px;'>";
+                if (filmSession.getDate().get(Calendar.DAY_OF_MONTH) < 10 && filmSession.getDate().get(Calendar.DAY_OF_MONTH) >=0){
+                    result += "0";
+                }
+                result += filmSession.getDate().get(Calendar.DAY_OF_MONTH) + ".";
+                if (filmSession.getDate().get(Calendar.MONTH) < 10 && filmSession.getDate().get(Calendar.MONTH) >=0){
+                    result += "0";
+                }
+                result += filmSession.getDate().get(Calendar.MONTH) + " ";
+                if (filmSession.getDate().get(Calendar.HOUR) < 10 && filmSession.getDate().get(Calendar.HOUR) >=0){
+                    result += "0";
+                }
+                result += filmSession.getDate().get(Calendar.HOUR) + ":";
+                if (filmSession.getDate().get(Calendar.MINUTE) < 10 && filmSession.getDate().get(Calendar.MINUTE) >=0){
+                    result += "0";
+                }
+                result += filmSession.getDate().get(Calendar.MINUTE) +
                         " </span><br>\n" +
                         "    <span>Свободных мест: " +
-                        session.getAllPlaces().size() +
+                        filmSession.getAllPlaces().size() +
                         "</span><br>" +
                         "    <span>Фильм: " +
-                        session.getFilm().getFilmName() +
+                        filmSession.getFilm().getFilmName() +
                         "</span><br>" +
                         "<span>Продолжительность: " +
-                        String.format("%.0f", session.getDuration()) + " мин" +
+                        String.format("%.0f", filmSession.getDuration()) + " мин" +
                         "</span>\n" +
                         "</div>" +
                         "</html>";
@@ -181,7 +196,7 @@ public class MainFrameAdmin extends AbstractFrame {
         list.addListSelectionListener(event -> {
             if (!list.isSelectionEmpty()) {
                 //JOptionPane.showMessageDialog(this, "Сеанс выбран");
-                selectedSession = (Session) list.getSelectedValue();
+                selectedFilmSession = (FilmSession) list.getSelectedValue();
                 SwingUtilities.invokeLater(() -> {
                     String result = "<html><style>\n" +
                             "    div.wrapper {\n" +
@@ -191,10 +206,24 @@ public class MainFrameAdmin extends AbstractFrame {
                             "<div class=\"wrapper\">\n" +
                             "    <div>\n" +
                             "<span style='color: blue; font-size: 15px;'>" +
-                            (int) selectedSession.getId() +
-                            " </span><span style='font-size: 15px;'>" +
-                            selectedSession.getDate().get(Calendar.DAY_OF_MONTH) + "." + selectedSession.getDate().get(Calendar.MONTH) + " " + selectedSession.getDate().get(Calendar.HOUR)
-                            + ":" + selectedSession.getDate().get(Calendar.MINUTE) +
+                            (int) selectedFilmSession.getId() +
+                            " </span><span style='font-size: 15px;'>";
+                    if (selectedFilmSession.getDate().get(Calendar.DAY_OF_MONTH) < 10 && selectedFilmSession.getDate().get(Calendar.DAY_OF_MONTH) >=0){
+                        result += "0";
+                    }
+                    result += selectedFilmSession.getDate().get(Calendar.DAY_OF_MONTH) + ".";
+                    if (selectedFilmSession.getDate().get(Calendar.MONTH) < 10 && selectedFilmSession.getDate().get(Calendar.MONTH) >=0){
+                        result += "0";
+                    }
+                    result += selectedFilmSession.getDate().get(Calendar.MONTH) + " ";
+                    if (selectedFilmSession.getDate().get(Calendar.HOUR) < 10 && selectedFilmSession.getDate().get(Calendar.HOUR) >=0){
+                        result += "0";
+                    }
+                    result += selectedFilmSession.getDate().get(Calendar.HOUR) + ":";
+                    if (selectedFilmSession.getDate().get(Calendar.MINUTE) < 10 && selectedFilmSession.getDate().get(Calendar.MINUTE) >=0){
+                        result += "0";
+                    }
+                     result+= selectedFilmSession.getDate().get(Calendar.MINUTE) +
                             " </span><br>\n" +
                             "</div>" +
                             "</html>";
@@ -202,18 +231,18 @@ public class MainFrameAdmin extends AbstractFrame {
                 });
                 if (placeList != null) {
                     modelPlaceList.clear();
-                    for (Place pl : selectedSession.getAllPlaces()) {
+                    for (Place pl : selectedFilmSession.getAllPlaces()) {
                         if (pl.getStatePlace() == StatePlace.AVAILABLE)
                             modelPlaceList.addElement(pl);
                     }
                 }
-                java.util.List<Session> newSessionList = controller.getSessionList();
+                java.util.List<FilmSession> newFilmSessionList = controller.getSessionList();
                 if (modelPlaceList.size() == 0){
                     secondPanel.setVisible(false);
                     modelSessionList.clear();
-                    for (Session s:newSessionList) {
-                        if (s.equals(selectedSession)){
-                            newSessionList.remove(s);
+                    for (FilmSession s: newFilmSessionList) {
+                        if (s.equals(selectedFilmSession)){
+                            newFilmSessionList.remove(s);
                         }
                         modelSessionList.addElement(s);
                     }
@@ -235,29 +264,29 @@ public class MainFrameAdmin extends AbstractFrame {
         if (type == MessageType.SESSION_LIST) {
             modelSessionList.clear();
             modelPlaceList.clear();
-            java.util.List<Session> listfromModel = controller.getSessionList();
+            java.util.List<FilmSession> listfromModel = controller.getSessionList();
 
             if (listfromModel != null) {
                 SwingUtilities.invokeLater(() -> {
 
-                    for (Session session : listfromModel) {
+                    for (FilmSession filmSession : listfromModel) {
                         int flag=0;
-                        for (Place p:session.getAllPlaces()){
+                        for (Place p: filmSession.getAllPlaces()){
                             if (p.getStatePlace()==StatePlace.AVAILABLE){
                                 flag++;
                             }
                         }
                         if (flag > 0) {
-                            modelSessionList.addElement(session);
+                            modelSessionList.addElement(filmSession);
                         }
-                        if (selectedSession != null) {
-                            if (session.getId() == selectedSession.getId()) {
-                                selectedSession = session;
+                        if (selectedFilmSession != null) {
+                            if (filmSession.getId() == selectedFilmSession.getId()) {
+                                selectedFilmSession = filmSession;
                             }
                         }
                     }
-                    if (selectedSession != null) {
-                        for (Place p : selectedSession.getAllPlaces()) {
+                    if (selectedFilmSession != null) {
+                        for (Place p : selectedFilmSession.getAllPlaces()) {
                             if (p.getStatePlace() == StatePlace.AVAILABLE)
                                 modelPlaceList.addElement(p);
                         }

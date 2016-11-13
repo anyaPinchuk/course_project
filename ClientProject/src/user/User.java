@@ -6,9 +6,21 @@ import java.io.Serializable;
  * Created by ANYA on 20.09.2016.
  */
 public class User  implements Serializable{
+    private Integer id;
     private String login;
     private String password;
     private boolean isAdmin;
+
+    public User() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public User(String login, String password, boolean isAdmin) {
         this.login = login;
