@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.sql.SQLException;
 
 /**
  * Created by ANYA on 20.09.2016.
@@ -61,5 +62,5 @@ public abstract class Connection implements Closeable{
         in.close();
     }
 
-    public abstract void serverMainLoop(User user) throws IOException, ClassNotFoundException;
+    public abstract void serverMainLoop(User user) throws IOException, ClassNotFoundException, SQLException;
 }

@@ -1,5 +1,7 @@
 package connection;
 
+import dao.FilmDAO;
+import dao.FilmSessionDAO;
 import message.Message;
 import message.MessageType;
 import server.Server;
@@ -11,7 +13,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by ANYA on 21.09.2016.
@@ -20,50 +24,59 @@ public class ConnectionAdmin extends Connection {
     private User user;
 
     @Override
-    public void serverMainLoop(User user) throws IOException, ClassNotFoundException{
-        synchronized (Server.allFilmSessions) {
+    public void serverMainLoop(User user) throws IOException, ClassNotFoundException, SQLException {
+        FilmDAO films = new FilmDAO();
+        FilmSessionDAO filmSessionDAO = new FilmSessionDAO();
+        List<FilmSession> allFilms = filmSessionDAO.findAll();
+        synchronized (allFilms) {
+            List<Film> filmList = films.findAll();
             System.out.println("sessionlist");
-            send(new Message(MessageType.SESSION_LIST, new LinkedList<>(Server.allFilmSessions)));
-            send(new Message(MessageType.FILM_LIST, new LinkedList<>(Server.films)));
+            send(new Message(MessageType.SESSION_LIST, allFilms));
+            if (!filmList.isEmpty())
+                send(new Message(MessageType.FILM_LIST, filmList));
         }
         this.user = user;
-        do{
+        do {
             Message message = receive();
-            switch (message.getType()){
+            switch (message.getType()) {
                 case ADD_SESSION: {
+                    List<Film> filmList = films.findAll();
                     FilmSession filmSession = (FilmSession) message.getData();
-                    filmSession.setId(FilmSession.getAutoId());
                     Film film = filmSession.getFilm();
-                    for (Film f: Server.films) {
-                        if (f.getFilmName().equals(film.getFilmName())){
-                            film.setDuration(f.getDuration());
-                            film.setDescription(f.getDescription());
-                            film.setGenre(f.getGenre());
+                    if (!filmList.isEmpty()) {
+                        for (Film f : filmList) {
+                            if (f.getFilmName().equals(film.getFilmName())) {
+                                film.setDescription(f.getDescription());
+                                film.setGenre(f.getGenre());
+                                break;
+                            }
                         }
                     }
-                    synchronized (Server.allFilmSessions){
-                        Server.allFilmSessions.add(filmSession);
+                    synchronized (allFilms) {
+                        filmSessionDAO.insert(filmSession);
+                        allFilms = filmSessionDAO.findAll();
                         send(new Message(MessageType.SESSION_ADDED));
-                        Server.sendBroadcastMessage(new Message(MessageType.SESSION_LIST, new LinkedList<>(Server.allFilmSessions)));
+                        Server.sendBroadcastMessage(new Message(MessageType.SESSION_LIST, allFilms));
                     }
                     break;
                 }
-                case DELETE_SESSION:{
-                    int id = (Integer) message.getData() - 1;
+                case DELETE_SESSION: {
+                    int id = (Integer) message.getData();
                     int flag = 0;
-                    synchronized (Server.allFilmSessions){
-                        for (FilmSession s:Server.allFilmSessions) {
-                            if(s.getId() == id){
-                                Server.allFilmSessions.remove(id);
+                    allFilms = filmSessionDAO.findAll();
+                    synchronized (allFilms) {
+                        for (FilmSession s : allFilms) {
+                            if (s.getId() == id) {
+                                filmSessionDAO.deleteById(id);
                                 flag++;
                             }
                         }
                     }
-                    if (flag == 0){
+                    if (flag == 0) {
                         send(new Message(MessageType.ID_NOT_FOUND));
-                    }
-                    else send(new Message(MessageType.SESSION_DELETED));
-                    Server.sendBroadcastMessage(new Message(MessageType.SESSION_LIST, new LinkedList<>(Server.allFilmSessions)));
+                    } else send(new Message(MessageType.SESSION_DELETED));
+                    allFilms = filmSessionDAO.findAll();
+                    Server.sendBroadcastMessage(new Message(MessageType.SESSION_LIST, allFilms));
                     break;
                 }
             }

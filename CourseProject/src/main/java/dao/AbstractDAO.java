@@ -17,9 +17,9 @@ public abstract class AbstractDAO<T> {
 
     public abstract T findByField(Object login) throws SQLException;
 
-    public abstract Integer updateById(Integer id, T entity) throws SQLException;
+    public abstract void updateFieldById(Integer id, Object field) throws SQLException;
 
     public abstract Integer insert(T entity) throws SQLException;
 
-    public abstract Integer deleteById(Integer id) throws SQLException;
+    public abstract void deleteById(Integer id) throws SQLException;
 }

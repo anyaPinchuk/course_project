@@ -7,56 +7,58 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
 -- -----------------------------------------------------
 -- Schema mydb
 -- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
 CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
 USE `mydb` ;
-
--- -----------------------------------------------------
--- Table `mydb`.`user`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`user` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `login` VARCHAR(45) NOT NULL,
-  `password` VARCHAR(45) NOT NULL,
-  `isAdmin` TINYINT(1) NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
-  UNIQUE INDEX `login_UNIQUE` (`login` ASC))
-ENGINE = InnoDB;
-
 
 -- -----------------------------------------------------
 -- Table `mydb`.`film`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`film` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `genre` VARCHAR(100) NULL,
+  `film_id` INT(10) UNSIGNED NOT NULL,
+  `genre` VARCHAR(100) NULL DEFAULT NULL,
   `name` VARCHAR(100) NOT NULL,
-  `description` VARCHAR(500) NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
+  `description` VARCHAR(500) NULL DEFAULT NULL,
+  PRIMARY KEY (`film_id`),
+  UNIQUE INDEX `id_UNIQUE` (`film_id` ASC),
   UNIQUE INDEX `name_UNIQUE` (`name` ASC))
-ENGINE = InnoDB;
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`filmSession`
+-- Table `mydb`.`film_session`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`filmSession` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `mydb`.`film_session` (
+  `film_session_id` INT(10) UNSIGNED NOT NULL,
   `duration` DOUBLE UNSIGNED NOT NULL,
-  `film_id` INT UNSIGNED NOT NULL,
   `date` DATETIME NOT NULL,
-  `film_id1` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`id`, `film_id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
+  `film_id` INT(10) UNSIGNED NOT NULL,
+  PRIMARY KEY (`film_session_id`),
+  UNIQUE INDEX `id_UNIQUE` (`film_session_id` ASC),
   UNIQUE INDEX `date_UNIQUE` (`date` ASC),
-  INDEX `fk_session_film_idx` (`film_id1` ASC),
-  CONSTRAINT `fk_session_film`
-    FOREIGN KEY (`film_id1`)
-    REFERENCES `mydb`.`film` (`id`)
+  INDEX `fk_film_session_film1_idx` (`film_id` ASC),
+  CONSTRAINT `fk_film_session_film1`
+    FOREIGN KEY (`film_id`)
+    REFERENCES `mydb`.`film` (`film_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`film_session_place`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`film_session_place` (
+  `film_session_film_session_id` INT(11) NOT NULL,
+  `allPlaces_place_id` INT(11) NOT NULL,
+  UNIQUE INDEX `UK_ifl5uxokbe1spgk5v1jyls7c4` (`allPlaces_place_id` ASC))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
@@ -64,39 +66,55 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`place` (
   `price` DOUBLE UNSIGNED NOT NULL,
-  `number` INT UNSIGNED NOT NULL,
-  `state` VARCHAR(45) GENERATED ALWAYS AS (Свободно) VIRTUAL,
-  `session_id` INT UNSIGNED NOT NULL,
-  `session_film_id` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`number`),
-  UNIQUE INDEX `number_UNIQUE` (`number` ASC),
-  INDEX `fk_place_session1_idx` (`session_id` ASC, `session_film_id` ASC),
+  `place_id` INT(10) UNSIGNED NOT NULL,
+  `state` VARCHAR(45) NULL,
+  `film_session_id` INT(10) UNSIGNED NOT NULL,
+  PRIMARY KEY (`place_id`),
+  UNIQUE INDEX `number_UNIQUE` (`place_id` ASC),
+  INDEX `fk_place_session1_idx` (`film_session_id` ASC),
   CONSTRAINT `fk_place_session1`
-    FOREIGN KEY (`session_id` , `session_film_id`)
-    REFERENCES `mydb`.`filmSession` (`id` , `film_id`)
+    FOREIGN KEY (`film_session_id`)
+    REFERENCES `mydb`.`film_session` (`film_session_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
 -- Table `mydb`.`ticket`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`ticket` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `ticket_id` INT(11) NOT NULL,
   `loginOfUser` VARCHAR(45) NOT NULL,
-  `placeNumber` INT UNSIGNED NOT NULL,
-  `session_id` INT UNSIGNED NOT NULL,
-  `session_film_id` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
-  INDEX `fk_ticket_session1_idx` (`session_id` ASC, `session_film_id` ASC),
-  CONSTRAINT `fk_ticket_session1`
-    FOREIGN KEY (`session_id` , `session_film_id`)
-    REFERENCES `mydb`.`filmSession` (`id` , `film_id`)
+  `film_session_id` INT(10) UNSIGNED NOT NULL,
+  `placeNumber` INT(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`ticket_id`),
+  UNIQUE INDEX `id_UNIQUE` (`ticket_id` ASC),
+  INDEX `fk_ticket_film_session1_idx` (`film_session_id` ASC),
+  CONSTRAINT `fk_ticket_film_session1`
+    FOREIGN KEY (`film_session_id`)
+    REFERENCES `mydb`.`film_session` (`film_session_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`user`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`user` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `login` VARCHAR(45) NOT NULL,
+  `password` VARCHAR(45) NOT NULL,
+  `isAdmin` TINYINT(1) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC),
+  UNIQUE INDEX `login_UNIQUE` (`login` ASC))
+ENGINE = InnoDB
+AUTO_INCREMENT = 13
+DEFAULT CHARACTER SET = utf8;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

@@ -1,25 +1,46 @@
 package session;
 
+import javax.persistence.*;
 import java.io.Serializable;
 
 /**
  * Created by ANYA on 07.10.2016.
  */
+@Entity
 public class Place implements Serializable{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer place_id;
     private double price;
-    private StatePlace statePlace = StatePlace.AVAILABLE;
-    private int placeNumber;
+    @Column(name = "state")
+    //@Enumerated(EnumType.STRING)
+    private String statePlace = StatePlace.AVAILABLE.getS();
+    @ManyToOne
+    @JoinColumn(name = "film_session_id")
+    private FilmSession film_session;
 
-    public Place(double price, StatePlace statePlace, int placeNumber) {
+    public Place(double price, String statePlace, int placeNumber) {
         this.price = price;
         this.statePlace = statePlace;
-        this.placeNumber = placeNumber;
+        this.place_id = placeNumber;
     }
 
     public Place(Place place) {
         this.price = place.price;
         this.statePlace = place.statePlace;
-        this.placeNumber = place.placeNumber;
+        this.place_id = place.place_id;
+    }
+
+    public Place() {
+    }
+
+
+    public Integer getPlace_id() {
+        return place_id;
+    }
+
+    public void setPlace_id(Integer place_id) {
+        this.place_id = place_id;
     }
 
     public double getPrice() {
@@ -30,21 +51,20 @@ public class Place implements Serializable{
         this.price = price;
     }
 
-
-    public StatePlace getStatePlace() {
+    public String getStatePlace() {
         return statePlace;
     }
 
-    public void setStatePlace(StatePlace statePlace) {
+    public void setStatePlace(String statePlace) {
         this.statePlace = statePlace;
     }
 
-    public int getPlaceNumber() {
-        return placeNumber;
+    public FilmSession getFilm_session() {
+        return film_session;
     }
 
-    public void setPlaceNumber(int placeNumber) {
-        this.placeNumber = placeNumber;
+    public void setFilm_session(FilmSession film_session) {
+        this.film_session = film_session;
     }
 
     @Override
@@ -52,7 +72,7 @@ public class Place implements Serializable{
         return "Place{" +
                 "price=" + price +
                 ", statePlace=" + statePlace +
-                ", placeNumber=" + placeNumber +
+                ", placeNumber=" + place_id +
                 '}';
     }
 
@@ -64,8 +84,8 @@ public class Place implements Serializable{
         Place place = (Place) o;
 
         if (Double.compare(place.price, price) != 0) return false;
-        if (placeNumber != place.placeNumber) return false;
-        return statePlace == place.statePlace;
+        if (place_id != null ? !place_id.equals(place.place_id) : place.place_id != null) return false;
+        return statePlace != null ? statePlace.equals(place.statePlace) : place.statePlace == null;
 
     }
 
@@ -73,10 +93,10 @@ public class Place implements Serializable{
     public int hashCode() {
         int result;
         long temp;
+        result = place_id != null ? place_id.hashCode() : 0;
         temp = Double.doubleToLongBits(price);
-        result = (int) (temp ^ (temp >>> 32));
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
         result = 31 * result + (statePlace != null ? statePlace.hashCode() : 0);
-        result = 31 * result + placeNumber;
         return result;
     }
 }

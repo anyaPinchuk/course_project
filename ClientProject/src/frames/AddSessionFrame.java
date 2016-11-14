@@ -288,7 +288,7 @@ public class AddSessionFrame extends AbstractFrame {
                 priceOfPlace = Double.parseDouble(price);
                 durOfFilm = Integer.parseInt(duration);
                 for (int i = 1;i<=countOfPlaces;i++){
-                    places.add(new Place(priceOfPlace, StatePlace.AVAILABLE, i));
+                    places.add(new Place(priceOfPlace, StatePlace.AVAILABLE.getS(), i));
                 }
                 controller.addSession(session1,places,durOfFilm,(String) filmName.getSelectedItem());
             }

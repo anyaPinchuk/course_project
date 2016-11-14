@@ -11,7 +11,11 @@
         <property name="current_session_context_class">thread</property>
         <property name="show_sql">true</property>
         <property name="dialect">org.hibernate.dialect.MySQL5Dialect</property>
-
+        <property name="hibernate.hbm2ddl.auto">update</property>
         <mapping class="user.User"/>
+        <mapping class="session.Place"/>
+        <mapping class="session.Film"/>
+        <mapping class="session.FilmSession"/>
+        <mapping class="session.Ticket"/>
     </session-factory>
 </hibernate-configuration>

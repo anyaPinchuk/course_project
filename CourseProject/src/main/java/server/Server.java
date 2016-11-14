@@ -21,12 +21,12 @@ public class Server {
     public static Map<User, Connection> connectionMap = new ConcurrentHashMap<User, Connection>();
     //public static Map<String, User> users = new ConcurrentHashMap<String, User>();
     public static Set<Ticket> boughtTickets = new TreeSet<Ticket>();
-    public static List<FilmSession> allFilmSessions = new LinkedList<FilmSession>();
-    public static List<Film> films = new LinkedList<Film>();
+    //public static List<FilmSession> allFilmSessions = new LinkedList<FilmSession>();
+    //public static List<Film> films = new LinkedList<Film>();
     public static Set<Ticket> bookedTickets = new TreeSet<Ticket>();
 
     static {
-        films.add(new Film("Мстители","Фантастика",145,"бла бла бла"));
+        //films.add(new Film("Мстители","Фантастика","бла бла бла"));
         //users.put("a", new User("a", "a", false));
         //users.put("ad", new User("ad", "ad", true));
         Calendar session1 = Calendar.getInstance();
@@ -34,19 +34,19 @@ public class Server {
         Calendar session2 = Calendar.getInstance();
         session2.set(2016,10,15,14,10);
         ArrayList<Place> places = new ArrayList<Place>();
-        places.add(new Place(20.5, StatePlace.AVAILABLE, 1));
-        places.add(new Place(10.5, StatePlace.AVAILABLE, 2));
-        places.add(new Place(10.5, StatePlace.AVAILABLE, 3));
-        places.add(new Place(10.5, StatePlace.AVAILABLE, 4));
-        places.add(new Place(15.5, StatePlace.AVAILABLE, 5));
-        places.add(new Place(10.5, StatePlace.AVAILABLE, 6));
-        places.add(new Place(10.5, StatePlace.AVAILABLE, 7));
-        places.add(new Place(12.5, StatePlace.AVAILABLE, 8));
-        places.add(new Place(10.5, StatePlace.AVAILABLE, 9));
+        places.add(new Place(20.5, StatePlace.AVAILABLE.getS(), 1));
+        places.add(new Place(10.5, StatePlace.AVAILABLE.getS(), 2));
+        places.add(new Place(10.5, StatePlace.AVAILABLE.getS(), 3));
+        places.add(new Place(10.5, StatePlace.AVAILABLE.getS(), 4));
+        places.add(new Place(15.5, StatePlace.AVAILABLE.getS(), 5));
+//        places.add(new Place(10.5, StatePlace.AVAILABLE, 6));
+//        places.add(new Place(10.5, StatePlace.AVAILABLE, 7));
+//        places.add(new Place(12.5, StatePlace.AVAILABLE, 8));
+//        places.add(new Place(10.5, StatePlace.AVAILABLE, 9));
         ArrayList<Place> places1 = new ArrayList<Place>();
-        places1.add(new Place(22.7, StatePlace.AVAILABLE, 1));
-        allFilmSessions.add(new FilmSession(session1, places, 160, films.get(0)));
-        allFilmSessions.add(new FilmSession(session2, places1, 170, films.get(0)));
+        places1.add(new Place(22.7, StatePlace.AVAILABLE.getS(), 1));
+        //allFilmSessions.add(new FilmSession(session1, places, 160, films.get(0)));
+       // allFilmSessions.add(new FilmSession(session2, places1, 170, films.get(0)));
     }
 
     public static void sendBroadcastMessage(Message message) {
@@ -113,7 +113,6 @@ public class Server {
                     User user = (User) answer.getData();
                     if (Log.registration(user)) {
                         //users.put(user.getLogin(), user);
-                        //userDAO.insert(user);
                         connectionMap.put(user, connection);
                         connection.send(new Message(MessageType.USER_REGISTERED, answer.getData()));
                         return user;

@@ -22,8 +22,8 @@ import java.util.concurrent.Future;
 public class ClientGuiModel {
     private final ClientGuiView view;
 
-    private List<FilmSession> filmSessions = new LinkedList<>();
-    private List<Film> films = new LinkedList<>();
+    private List<FilmSession> filmSessions = new ArrayList<>();
+    private List<Film> films = new ArrayList<>();
 
     public List<FilmSession> getFilmSessions() {
         return filmSessions;
@@ -168,6 +168,7 @@ public class ClientGuiModel {
                 try {
                     loop();
                 } catch (Exception exception) {
+                    exception.printStackTrace();
                     System.out.println(exception);
                     System.out.println("Бай-бай");
                     //connectError();
@@ -224,7 +225,7 @@ public class ClientGuiModel {
         switch (message.getType()) {
             case USER_ACCEPTED: {
                 user = (User) message.getData();
-                if (user.isAdmin()) {
+                if (user.getIsAdmin()) {
                     connectSuccessAdmin();
                 } else connectSuccess();
                 view.updateWindow(nowConnectionState);
@@ -271,7 +272,7 @@ public class ClientGuiModel {
 
     public void addSession(Calendar date, ArrayList<Place> places, int duration, String filmName){
         try {
-            connection.send(new Message(MessageType.ADD_SESSION, new FilmSession(date,places,duration,new Film(filmName,"",0,""))));
+            connection.send(new Message(MessageType.ADD_SESSION, new FilmSession(date,places,duration,new Film(filmName,"",""))));
         } catch (Exception exception) {
             connectError();
         }
@@ -288,13 +289,13 @@ public class ClientGuiModel {
         System.out.println(message.getType());
         switch (message.getType()) {
             case SESSION_LIST: {
-                filmSessions = (LinkedList<FilmSession>) message.getData();
+                filmSessions = (ArrayList<FilmSession>) message.getData();
                 System.out.println(filmSessions);
                 view.showInfoToUser(message.getType(), filmSessions);
                 break;
             }
             case FILM_LIST:{
-                films = (LinkedList<Film>) message.getData();
+                films = (ArrayList<Film>) message.getData();
                 view.showInfoToUser(message.getType(), films);
                 break;
             }
@@ -306,13 +307,13 @@ public class ClientGuiModel {
         System.out.println(message.getType());
         switch (message.getType()) {
             case SESSION_LIST: {
-                filmSessions = (LinkedList<FilmSession>) message.getData();
+                filmSessions = (ArrayList<FilmSession>) message.getData();
                 System.out.println(filmSessions);
                 view.showInfoToUser(message.getType(), filmSessions);
                 break;
             }
             case FILM_LIST:{
-                films = (LinkedList<Film>) message.getData();
+                films = (ArrayList<Film>) message.getData();
                 view.showInfoToUser(message.getType(), films);
                 break;
             }

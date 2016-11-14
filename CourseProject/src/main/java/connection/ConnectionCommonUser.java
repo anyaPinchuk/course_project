@@ -1,11 +1,14 @@
 package connection;
 
+import dao.FilmDAO;
+import dao.FilmSessionDAO;
 import message.Message;
 import message.MessageType;
 import server.Server;
 
 import static server.Server.*;
 
+import session.Film;
 import session.FilmSession;
 import session.Place;
 import session.StatePlace;
@@ -15,8 +18,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by ANYA on 21.09.2016.
@@ -31,11 +36,17 @@ public class ConnectionCommonUser extends Connection {
     }
 
     @Override
-    public void serverMainLoop(User user) throws IOException, ClassNotFoundException {
-        synchronized (Server.allFilmSessions) {
+    public void serverMainLoop(User user) throws IOException, ClassNotFoundException, SQLException {
+        FilmDAO films = new FilmDAO();
+        FilmSessionDAO filmSessionDAO = new FilmSessionDAO();
+        List<FilmSession> allFilms = filmSessionDAO.findAll();
+        synchronized (allFilms) {
+            List<Film> filmList = films.findAll();
             System.out.println("sessionlist");
-            send(new Message(MessageType.SESSION_LIST, new LinkedList<>(allFilmSessions)));
-            send(new Message(MessageType.FILM_LIST, new LinkedList<>(Server.films)));
+            if (!allFilms.isEmpty())
+            send(new Message(MessageType.SESSION_LIST, allFilms));
+            if (!filmList.isEmpty())
+            send(new Message(MessageType.FILM_LIST, filmList));
         }
         this.user = user;
         do {
@@ -50,32 +61,39 @@ public class ConnectionCommonUser extends Connection {
                     break;
                 }
                 case SELECTED_SESSION: {
-                    selectedFilmSession = allFilmSessions.get(allFilmSessions.indexOf(message.getData()));
+                    selectedFilmSession = allFilms.get(allFilms.indexOf(message.getData()));
                     break;
                 }
             }
         } while (true);
     }
 
-    public void buyPlaces(ArrayList<Place> places) {
-        synchronized (allFilmSessions) {
-            FilmSession filmSession = allFilmSessions.stream().filter(s -> s.equals(selectedFilmSession)).findFirst().orElse(null);
+    public void buyPlaces(ArrayList<Place> places) throws SQLException {
+        FilmSessionDAO filmSessionDAO = new FilmSessionDAO();
+        List<FilmSession> allFilms = filmSessionDAO.findAll();
+
+        synchronized (allFilms) {
+            FilmSession filmSession = allFilms.stream().filter(s -> s.equals(selectedFilmSession)).findFirst().orElse(null);
             if (filmSession != null)
-                filmSession.getAllPlaces().stream().filter(places::contains).forEach(place -> place.setStatePlace(StatePlace.BOUGHT));
-            sendBroadcastMessage(new Message(MessageType.SESSION_LIST,  new LinkedList<>(allFilmSessions)));
+                //сделать update in db stateplace field
+                filmSession.getAllPlaces().stream().filter(places::contains).forEach(place -> place.setStatePlace(StatePlace.BOUGHT.getS()));
+            allFilms = filmSessionDAO.findAll();
+            sendBroadcastMessage(new Message(MessageType.SESSION_LIST,  allFilms));
         }
 
     }
 
-    public void bookPlaces(ArrayList<Place> places) {
-        synchronized (allFilmSessions) {
-            FilmSession filmSession = allFilmSessions.stream().filter(s -> s.equals(selectedFilmSession)).findFirst().orElse(null);
+    public void bookPlaces(ArrayList<Place> places) throws SQLException{
+        FilmSessionDAO filmSessionDAO = new FilmSessionDAO();
+        List<FilmSession> allFilms = filmSessionDAO.findAll();
+        synchronized (allFilms) {
+            FilmSession filmSession = allFilms.stream().filter(s -> s.equals(selectedFilmSession)).findFirst().orElse(null);
             if (filmSession != null) {
-                filmSession.getAllPlaces().stream().filter(places::contains).forEach(place -> place.setStatePlace(StatePlace.BOOKED));
+                //сделать update in db stateplace field
+                filmSession.getAllPlaces().stream().filter(places::contains).forEach(place -> place.setStatePlace(StatePlace.BOOKED.getS()));
             }
-            LinkedList list = new LinkedList();
-            allFilmSessions.forEach(session2 -> list.add(new FilmSession(session2)));
-            sendBroadcastMessage(new Message(MessageType.SESSION_LIST, list));
+            allFilms = filmSessionDAO.findAll();
+            sendBroadcastMessage(new Message(MessageType.SESSION_LIST,  allFilms));
         }
     }
 

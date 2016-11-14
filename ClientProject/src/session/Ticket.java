@@ -4,11 +4,20 @@ package session;
  * Created by ANYA on 07.10.2016.
  */
 public class Ticket {
+    private Integer ticket_id;
     private String loginOfUser;
-    private int placeNumber;
+    private Integer placeNumber;
     private FilmSession filmSession;
 
     public Ticket() {
+    }
+
+    public Integer getTicket_id() {
+        return ticket_id;
+    }
+
+    public void setTicket_id(Integer ticket_id) {
+        this.ticket_id = ticket_id;
     }
 
     public Ticket(String loginOfUser, int placeNumber, FilmSession filmSession) {
@@ -25,7 +34,7 @@ public class Ticket {
         this.filmSession = filmSession;
     }
 
-    public int getPlaceNumber() {
+    public Integer getPlaceNumber() {
         return placeNumber;
     }
 

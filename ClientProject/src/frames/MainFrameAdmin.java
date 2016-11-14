@@ -72,7 +72,7 @@ public class MainFrameAdmin extends AbstractFrame {
             for (FilmSession filmSession : filmSessionList) {
                 int flag=0;
                 for (Place p: filmSession.getAllPlaces()){
-                    if (p.getStatePlace()== StatePlace.AVAILABLE){
+                    if (p.getStatePlace().equals(StatePlace.AVAILABLE.getS())){
                         flag++;
                     }
                 }
@@ -166,7 +166,7 @@ public class MainFrameAdmin extends AbstractFrame {
                         "<div class=\"wrapper\">\n" +
                         "    <div>\n" +
                         "<span>Место №" +
-                        place.getPlaceNumber() +
+                        place.getPlace_id() +
                         "<span>Цена " +
                         place.getPrice() + " руб" +
                         "</span><br>" +
@@ -232,7 +232,7 @@ public class MainFrameAdmin extends AbstractFrame {
                 if (placeList != null) {
                     modelPlaceList.clear();
                     for (Place pl : selectedFilmSession.getAllPlaces()) {
-                        if (pl.getStatePlace() == StatePlace.AVAILABLE)
+                        if (pl.getStatePlace().equals(StatePlace.AVAILABLE.getS()))
                             modelPlaceList.addElement(pl);
                     }
                 }
@@ -272,7 +272,7 @@ public class MainFrameAdmin extends AbstractFrame {
                     for (FilmSession filmSession : listfromModel) {
                         int flag=0;
                         for (Place p: filmSession.getAllPlaces()){
-                            if (p.getStatePlace()==StatePlace.AVAILABLE){
+                            if (p.getStatePlace().equals(StatePlace.AVAILABLE.getS())){
                                 flag++;
                             }
                         }
@@ -287,7 +287,7 @@ public class MainFrameAdmin extends AbstractFrame {
                     }
                     if (selectedFilmSession != null) {
                         for (Place p : selectedFilmSession.getAllPlaces()) {
-                            if (p.getStatePlace() == StatePlace.AVAILABLE)
+                            if (p.getStatePlace().equals(StatePlace.AVAILABLE.getS()))
                                 modelPlaceList.addElement(p);
                         }
                     }

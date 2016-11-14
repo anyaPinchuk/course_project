@@ -1,14 +1,31 @@
 package session;
 
+import javax.persistence.*;
+
 /**
  * Created by ANYA on 07.10.2016.
  */
+@Entity
+@Table(name = "ticket")
 public class Ticket {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer ticket_id;
     private String loginOfUser;
-    private int placeNumber;
+    private Integer placeNumber;
+    @ManyToOne
+    @JoinColumn(name = "film_session_id")
     private FilmSession filmSession;
 
     public Ticket() {
+    }
+
+    public Integer getTicket_id() {
+        return ticket_id;
+    }
+
+    public void setTicket_id(Integer ticket_id) {
+        this.ticket_id = ticket_id;
     }
 
     public Ticket(String loginOfUser, int placeNumber, FilmSession filmSession) {
@@ -25,7 +42,7 @@ public class Ticket {
         this.filmSession = filmSession;
     }
 
-    public int getPlaceNumber() {
+    public Integer getPlaceNumber() {
         return placeNumber;
     }
 

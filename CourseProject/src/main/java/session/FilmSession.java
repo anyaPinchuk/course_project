@@ -1,30 +1,40 @@
 package session;
 
+import org.junit.Test;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * Created by ANYA on 07.10.2016.
  */
+@Entity
+@Table(name = "film_session")
 public class FilmSession implements Serializable{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "film_session_id")
+    private Integer id;
     private Calendar date;
-    private double id;
-    private static int autoId = 0;
-    private ArrayList<Place> allPlaces;
+    //@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "film_session", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<Place> allPlaces;
     private double duration;
+    @ManyToOne
+    @JoinColumn(name = "film_id")
     private Film film;
-
-    public static int getAutoId() {
-        return ++autoId;
-    }
 
     public FilmSession(Calendar date, ArrayList<Place> allPlaces, double duration, Film film) {
         this.date = date;
-        this.id = ++autoId;
         this.allPlaces = allPlaces;
         this.duration = duration;
         this.film = film;
+    }
+
+    public FilmSession() {
     }
 
     public FilmSession(FilmSession filmSession){
@@ -41,7 +51,7 @@ public class FilmSession implements Serializable{
         return id;
     }
 
-    public void setId(double id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -61,7 +71,7 @@ public class FilmSession implements Serializable{
         this.date = date;
     }
 
-    public ArrayList<Place> getAllPlaces() {
+    public List<Place> getAllPlaces() {
         return allPlaces;
     }
 
